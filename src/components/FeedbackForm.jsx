@@ -1,4 +1,4 @@
-import { useState, useContext } from "react"
+import { useState, useContext, useEffect } from "react"
 import Card from "./shared/Card"
 import Button from "./shared/Button"
 import Rating from "./Rating"
@@ -8,7 +8,16 @@ function FeedbackForm() {
   const[text, setText] = useState('')
   const [rating, setRating] = useState(10)
   const [btnDisabled, setBtnDisabled] = useState(true)
-  const {addFeedback} = useContext(FeedbackContext)
+  const {addFeedback, feedbackEdit, updateFeedback} = useContext(FeedbackContext)
+
+  useEffect(() => {
+    if(feedbackEdit.edit === true){
+      setBtnDisabled(false)
+      setText(feedbackEdit.item.text)
+      setRating(feedbackEdit.item.rating)
+    }
+  }, [feedbackEdit])
+
   const handleTextChange = (e) => {
     if(text === ''){
         setBtnDisabled(true)
@@ -31,20 +40,26 @@ function FeedbackForm() {
             text: text,
             rating: rating
         }
-        addFeedback(newFeedback)
+        
+        if(feedbackEdit.edit === true){
+          updateFeedback(feedbackEdit.item.id, newFeedback)
+        }
+        else {
+         addFeedback(newFeedback)
+        }
         setText('')
     }
   }
   return (
     <Card>
         <form onSubmit={handleSubmit}>
-            <h2>How would you rate our service?</h2>
-            <Rating select={(rating) => setRating(rating)} />
-            <div className="input-group">
-                <input onChange={handleTextChange} type="text" placeholder="Write a review" value={text} />
-                <Button type="submit" isDisabled={btnDisabled}>Send</Button>
-            </div>
-            {msg && <div className="message">{msg}</div> }
+          <h2>How would you rate our service?</h2>
+          <Rating select={(rating) => setRating(rating)} />
+          <div className="input-group">
+            <input onChange={handleTextChange} type="text" placeholder="Write a review" value={text} />
+            <Button type="submit" isDisabled={btnDisabled}>Send</Button>
+          </div>
+          {msg && <div className="message">{msg}</div> }
         </form>
     </Card>
   )
